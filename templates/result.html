@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html> 
+    <head>
+        <title>Kết quả dự đoán</title>
+        <style>
+            body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;        /* thay vì height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            }
+            button, a.button-link {
+                display: inline-block;
+                padding: 10px 20px;
+                margin: 10px;
+                font-size: 16px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                text-decoration: none;
+            }
+            button:hover, a.button-link:hover {
+                background-color: #45a049;
+            }
+            html, body { height: 100%; margin: 0; }
+            body {
+            background-image: url("static/img/background.jpg");
+            background-size: cover;
+            background-position: center;   
+            background-repeat: no-repeat;  
+            background-attachment: fixed;
+            }
+            .content {
+            min-height: 100%;
+            display: grid; place-items: center;
+            text-align: center; padding: 2rem;
+            }
+        </style>
+    </head>
+    <body>
+    <h1>Kết quả dự đoán</h1>
+    <p>{{ result }}</p>
+    <p>MSE: {{ error }}</p>
+
+    <h3>Biểu đồ Reconstruction</h3>
+    <img src="data:image/png;base64,{{ reconstruct }}" alt="Reconstruction Plot"/>
+
+    <br>
+    <a href="/" class="btn btn-success">Dự đoán cho một ngày khác</a>
+
+    </body>
+</html>

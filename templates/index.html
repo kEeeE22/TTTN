@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dự đoán rò rỉ nước</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;        /* thay vì height */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    html, body { height: 100%; margin: 0; }
+    body {
+      /* thay đường dẫn ảnh của bạn vào url(...) */
+      background-image: url("static/img/background.jpg");
+      background-size: cover;        /* phủ kín màn hình, không méo ảnh */
+      background-position: center;   /* canh giữa ảnh */
+      background-repeat: no-repeat;  /* không lặp ảnh */
+      background-attachment: fixed;
+    }
+    .content {
+      min-height: 100%;
+      display: grid; place-items: center; /* căn giữa nội dung */
+      text-align: center; padding: 2rem;
+    }
+    .upload-form {
+      margin-top: 20px;
+    }
+
+    .upload-form input[type="file"] {
+      font-size: 18px;       /* chữ to hơn */
+      padding: 10px;         /* khoảng cách bên trong */
+      border: 2px solid #007BFF;
+      border-radius: 8px;
+      margin-right: 15px;
+    }
+
+    .upload-form button {
+      font-size: 18px;       /* chữ to hơn */
+      padding: 12px 24px;    /* nút to hơn */
+      border: none;
+      border-radius: 8px;
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .upload-form button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+    <h1>Chào mừng đến với trang dự đoán rò rỉ nước</h1>
+    <h3>Chọn file muốn đưa ra dự đoán</h3>
+
+    <form action="/predict" method="post" enctype="multipart/form-data" class="upload-form">
+        <input type="file" name="file" required>
+        <button type="submit">Dự đoán</button>
+    </form>
+
+</body>
+</html>
