@@ -1,0 +1,8 @@
+torch
+pandas
+numpy
+fastapi
+sqlalchemy
+pymysql
+joblib
+uvicorn 

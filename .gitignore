@@ -28,12 +28,6 @@ venv/
 # Logs
 *.log
 
-# Model checkpoints (nếu nặng, không muốn push)
-checkpoint/
-*.pth
-*.pkl
-*.joblib
-
 # VSCode / IDE
 .vscode/
 .idea/
