@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Kết quả dự đoán</title>
+    </head>
+    <style>
+        body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 100vh;
+        background-image: url("/static/img/background.jpg");
+        background-size: cover;
+        }
+    </style>
+    <body>
+        <h2>Kết quả dự đoán cho ngày {{ date_query }}</h2>
+        <table border="1" cellpadding="8" cellspacing="0">
+            <tr>
+                <th>Ngày</th>
+                <th>Trạng thái</th>
+            </tr>
+            {% for day, info in results.items() %}
+            <tr>
+                <td>{{ day }}</td>
+                <td>
+                    {% if info.status == "Bình thường" %}
+                        {{ info.status }}
+                    {% elif info.status == "Phát hiện rò rỉ nước" %}
+                        {{ info.status }}
+                    {% else %}
+                        {{ info.status }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <a href="/">Dự đoán cho ngày khác</a>
+    </body>
+</html>

@@ -1,62 +1,79 @@
 import torch
 import matplotlib.pyplot as plt
 import io, base64
+import pandas as pd
+from datetime import datetime, timedelta
+from collections import defaultdict
+from models import SensorData
 
 device = 'cpu'
 
 def predict_(
     model, 
-    x_sample: torch.Tensor,   # đầu vào bắt buộc là tensor
+    x_samples: torch.Tensor,
     threshold: float = 0.01, 
     flat: bool = True, 
     device: str = 'cpu', 
-    visualize: bool = False
 ):
     model.eval()
     with torch.no_grad():
-        if flat:
-            x = x_sample.view(1, -1).to(device)  # reshape phẳng
-        else:
-            x = x_sample.unsqueeze(0).to(device)  # giữ nguyên theo chuỗi
-
+        x = x_samples.view(1, -1).to(device)
         x_hat = model(x)
 
-        # Tính MSE reconstruction error
-        err = torch.mean((x_hat - x) ** 2).item()
-        pred = int(err > threshold)   # 1 = bất thường, 0 = bình thường
+        errs = torch.mean((x_hat - x) ** 2, dim=list(range(1, x_hat.dim())))
+        preds = (errs > threshold).int()
+    return preds.cpu().tolist(), errs.cpu().tolist()
 
-    img_base64 = None
-    if visualize:
-        W, F = x_sample.shape
-        if flat:
-            x_np = x.view(W, F).cpu().numpy()
-            x_hat_np = x_hat.view(W, F).cpu().numpy()
+
+def query_data(date_query, db):
+    try:
+        parsed_date = datetime.strptime(date_query, "%Y-%m-%d").date()
+    except ValueError:
+        return {"error": "Ngày không hợp lệ"}
+
+    start_date = parsed_date - timedelta(days=2)
+    end_date = parsed_date + timedelta(days=3)
+
+    records = db.query(SensorData).filter(
+        SensorData.timestamp >= datetime.combine(start_date, datetime.min.time()),
+        SensorData.timestamp < datetime.combine(end_date, datetime.min.time())
+    ).all()
+
+    return records, start_date, end_date 
+
+def preprocessing(records, start_date, end_date, scaler):
+    if not records:
+        return {}
+
+    df = pd.DataFrame([{
+        "pressure": r.pressure,
+        "total_flow": r.total_flow,
+        "consumption": r.consumption,
+        "instant_flow": r.instant_flow,
+        "timestamp": r.timestamp
+    } for r in records])
+
+    df = df.sort_values("timestamp")
+
+    features = ["instant_flow"]
+    df[features] = scaler.transform(df[features])
+
+    grouped = defaultdict(list)
+    for _, row in df.iterrows():
+        ts = row["timestamp"]
+        if ts.time() == ts.min.time():
+            day = (ts - timedelta(days=1)).date()
         else:
-            x_np = x.squeeze(0).cpu().numpy()
-            x_hat_np = x_hat.squeeze(0).cpu().numpy()
+            day = ts.date()
+        grouped[day].append(row[features].values)
 
-        fig, axes = plt.subplots(F, 1, figsize=(10, 2.5*F))
-        if F == 1:  
-            axes = [axes]
+    result = {}
+    current = start_date
+    while current <= end_date:
+        if current in grouped:
+            result[current] = pd.DataFrame(grouped[current], columns=features).values
+        else:
+            result[current] = "không có"
+        current += timedelta(days=1)
 
-        for f in range(F):
-            axes[f].plot(x_np[:, f], label="Original")
-            axes[f].plot(x_hat_np[:, f], linestyle="--", label="Reconstructed")
-            axes[f].set_title(f"LƯU LƯỢNG TỨC THỜI")
-            axes[f].legend()
-
-        plt.tight_layout()
-
-        buf = io.BytesIO()
-        plt.savefig(buf, format="png")
-        buf.seek(0)
-        img_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
-        plt.close(fig)
-
-    return pred, err, img_base64
-
-
-def preprocess_(sample_df, feature, scaler):
-    features_data = sample_df[feature].values
-    features_scaled = scaler.transform(features_data)
-    return features_scaled
+    return result
