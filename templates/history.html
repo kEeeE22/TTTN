@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lịch sử phát hiện</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .content {
+            flex: 1;
+            width: 90%;
+            max-width: 1200px;
+            margin-top: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: rgba(255, 255, 255, 0.9);
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>Lịch sử phát hiện</h2>
+        <div class="navbar-links">
+            <a href="/">Trang chủ</a>
+            <a href="/history">Xem lịch sử</a>
+            <a href="/logout" class="logout">Đăng xuất</a>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <table>
+            <tr>
+                <th>Ngày</th>
+                <th>Kết quả phát hiện</th>
+                <th>Áp suất TB</th>
+                <th>Lưu lượng TB</th>
+                <th>Thời điểm lưu</th>
+            </tr>
+            {% for row in predictions %}
+            <tr>
+                <td>{{ row.day }}</td>
+                <td>{{ row.detection_result }}</td>
+                <td>{{ row.avg_pressure if row.avg_pressure else "-" }}</td>
+                <td>{{ row.avg_flow if row.avg_flow else "-" }}</td>
+                <td>{{ row.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

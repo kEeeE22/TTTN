@@ -3,43 +3,66 @@
     <head>
         <title>Kết quả dự đoán</title>
     </head>
+    <link rel="stylesheet" href="/static/css/style.css">
     <style>
-        body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        height: 100vh;
-        background-image: url("/static/img/background.jpg");
-        background-size: cover;
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        table {
+            border-collapse: collapse;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        th, td {
+            padding: 10px 20px;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
         }
     </style>
     <body>
-        <h2>Kết quả dự đoán cho ngày {{ date_query }}</h2>
-        <table border="1" cellpadding="8" cellspacing="0">
-            <tr>
-                <th>Ngày</th>
-                <th>Trạng thái</th>
-            </tr>
-            {% for day, info in results.items() %}
-            <tr>
-                <td>{{ day }}</td>
-                <td>
-                    {% if info.status == "Bình thường" %}
-                        {{ info.status }}
-                    {% elif info.status == "Phát hiện rò rỉ nước" %}
-                        {{ info.status }}
-                    {% else %}
-                        {{ info.status }}
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-        <br>
-        <a href="/">Dự đoán cho ngày khác</a>
+        <div class="navbar">
+            <h2>Kết quả</h2>
+            <div class="navbar-links">
+                <a href="/">Trang chủ</a>
+                <a href="/history">Xem lịch sử</a>
+                <a href="/logout" class="logout">Đăng xuất</a>
+            </div>
+        </div>
+
+        <div class="content">
+            <h2>Kết quả dự đoán</h2>
+            <table border="1" cellpadding="8" cellspacing="0">
+                <tr>
+                    <th>Ngày</th>
+                    <th>Trạng thái</th>
+                </tr>
+                {% for day, info in results.items() %}
+                <tr>
+                    <td>{{ day }}</td>
+                    <td>
+                        {% if info.status == "Bình thường" %}
+                            {{ info.status }}
+                        {% elif info.status == "Phát hiện rò rỉ nước" %}
+                            {{ info.status }}
+                        {% else %}
+                            {{ info.status }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            <br>
+            <a href="/">Dự đoán cho ngày khác</a>
+        </div>
     </body>
 </html>

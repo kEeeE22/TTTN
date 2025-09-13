@@ -1,6 +1,4 @@
 import torch
-import matplotlib.pyplot as plt
-import io, base64
 import pandas as pd
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -12,7 +10,6 @@ def predict_(
     model, 
     x_samples: torch.Tensor,
     threshold: float = 0.01, 
-    flat: bool = True, 
     device: str = 'cpu', 
 ):
     model.eval()
@@ -24,26 +21,26 @@ def predict_(
         preds = (errs > threshold).int()
     return preds.cpu().tolist(), errs.cpu().tolist()
 
-
-def query_data(date_query, db):
+def query_data(date_query: str, db):
     try:
         parsed_date = datetime.strptime(date_query, "%Y-%m-%d").date()
     except ValueError:
-        return {"error": "Ngày không hợp lệ"}
+        return None, None   # ngày sai format
 
-    start_date = parsed_date - timedelta(days=2)
-    end_date = parsed_date + timedelta(days=3)
+    start_datetime = datetime.combine(parsed_date, datetime.min.time())
+    end_datetime = start_datetime + timedelta(days=1)
 
     records = db.query(SensorData).filter(
-        SensorData.timestamp >= datetime.combine(start_date, datetime.min.time()),
-        SensorData.timestamp < datetime.combine(end_date, datetime.min.time())
-    ).all()
+        SensorData.timestamp >= start_datetime,
+        SensorData.timestamp < end_datetime
+    ).order_by(SensorData.timestamp).all()
+    
+    return parsed_date, records
 
-    return records, start_date, end_date 
 
-def preprocessing(records, start_date, end_date, scaler):
+def preprocessing(records, scaler):
     if not records:
-        return {}
+        return None
 
     df = pd.DataFrame([{
         "pressure": r.pressure,
@@ -58,22 +55,4 @@ def preprocessing(records, start_date, end_date, scaler):
     features = ["instant_flow"]
     df[features] = scaler.transform(df[features])
 
-    grouped = defaultdict(list)
-    for _, row in df.iterrows():
-        ts = row["timestamp"]
-        if ts.time() == ts.min.time():
-            day = (ts - timedelta(days=1)).date()
-        else:
-            day = ts.date()
-        grouped[day].append(row[features].values)
-
-    result = {}
-    current = start_date
-    while current <= end_date:
-        if current in grouped:
-            result[current] = pd.DataFrame(grouped[current], columns=features).values
-        else:
-            result[current] = "không có"
-        current += timedelta(days=1)
-
-    return result
+    return df[features].values
