@@ -1,13 +1,14 @@
-from sqlalchemy import Column, Integer, Float, DateTime, String, TIMESTAMP, func, Date 
+from sqlalchemy import Column, Integer, Float, String, TIMESTAMP, func, Date, Time
 from db import Base
 
 class SensorData(Base):
     __tablename__ = "sensor_data"
        
-    timestamp = Column(DateTime, primary_key=True, index=True)
-    pressure = Column(Float)
-    total_flow = Column(Float)
-    consumption = Column(Float)
+    day = Column(Date, primary_key=True, index=True)
+    time = Column(Time, primary_key=True, index=True)
+    pressure = Column(Float)                        
+    total_flow = Column(Float)                        
+    consumption = Column(Float)                            
     instant_flow = Column(Float)
     
 class Detection(Base):

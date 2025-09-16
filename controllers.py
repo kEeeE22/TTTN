@@ -42,43 +42,6 @@ router = APIRouter()
 def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# @router.post("/predict", response_class=HTMLResponse)
-# def predict(request: Request,
-#     date_query: str = Form(...),
-#     db: Session = Depends(get_db)):
-
-#     #preprocess
-#     records, start_date, end_date = utils.query_data(date_query, db)
-
-#     scaled_data = utils.preprocessing(records=records, start_date=start_date, end_date=end_date, scaler=scaler)
-#     results = {}
-#     for day, data in scaled_data.items():
-#         if isinstance(data, str) and data == "không có":
-#             results[day] = {"status": "Không có dữ liệu"}
-#         else:
-#             x_tensor = torch.tensor(data, dtype=torch.float32)
-#             preds = utils.predict_(model, x_tensor, threshold=threshold)
-#             status = "Phát hiện rò rỉ" if preds == 1 else "Bình thường"
-#             results[str(day)] = {"status": status}
-#             detection = Detection(
-#             day=day, 
-#             detection_result=status
-#         )
-#         # Nếu day đã tồn tại trong DB → update thay vì insert mới
-#         existing = db.query(Detection).filter(Detection.day == day).first()
-#         if existing:
-#             existing.detection_result = status
-#         else:
-#             db.add(detection)
-
-#     # 5. Commit thay đổi
-#     db.commit()
-#     return templates.TemplateResponse("predict.html", {
-#         "request": request,
-#         "date_query": date_query,
-#         "results": results
-#     })
-
 @router.post("/predict", response_class=HTMLResponse)
 def predict(
     request: Request,
@@ -131,7 +94,7 @@ def history_page(request: Request, db: Session = Depends(get_db)):
             func.avg(SensorData.pressure).label("avg_pressure"),
             func.avg(SensorData.total_flow).label("avg_flow"),
         )
-        .join(SensorData, func.date(SensorData.timestamp) == Detection.day)
+        .join(SensorData, SensorData.day == Detection.day)
         .group_by(Detection.day, Detection.detection_result, Detection.created_at)
         .order_by(Detection.day.desc())
     )

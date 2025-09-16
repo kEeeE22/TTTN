@@ -30,10 +30,12 @@ def query_data(date_query: str, db):
     start_datetime = datetime.combine(parsed_date, datetime.min.time())
     end_datetime = start_datetime + timedelta(days=1)
 
-    records = db.query(SensorData).filter(
-        SensorData.timestamp >= start_datetime,
-        SensorData.timestamp < end_datetime
-    ).order_by(SensorData.timestamp).all()
+    records = (
+        db.query(SensorData)
+        .filter(SensorData.day == parsed_date)
+        .order_by(SensorData.time)
+        .all()
+    )
     
     return parsed_date, records
 
@@ -47,10 +49,11 @@ def preprocessing(records, scaler):
         "total_flow": r.total_flow,
         "consumption": r.consumption,
         "instant_flow": r.instant_flow,
-        "timestamp": r.timestamp
+        "day": r.day,
+        "time": r.time
     } for r in records])
 
-    df = df.sort_values("timestamp")
+    df = df.sort_values(["day", "time"])
 
     features = ["instant_flow"]
     df[features] = scaler.transform(df[features])
